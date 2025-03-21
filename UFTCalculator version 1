@@ -1,0 +1,222 @@
+import math
+import random
+import time
+import matplotlib.pyplot as plt
+
+# Constants
+G = 6.67430e-11  # Gravitational constant (m^3 kg^-1 s^-2)
+c = 299792458    # Speed of light in meters per second
+k = 8.9875e9     # Coulomb constant (N·m²/C²)
+
+# Force Calculation Functions
+def gravity_effect(mass1, mass2, distance):
+    """Calculate gravitational force between two masses."""
+    return (G * mass1 * mass2) / (distance ** 2)
+
+def electromagnetism_effect(charge1, charge2, distance):
+    """Calculate Coulomb's force between two charges."""
+    return k * (charge1 * charge2) / (distance ** 2)
+
+def relativistic_effect(velocity):
+    """Calculate Lorentz factor for time dilation and length contraction."""
+    gamma = 1 / math.sqrt(1 - (velocity ** 2 / c ** 2))
+    return gamma, 1 / gamma
+
+def weak_force_effect(distance, particle_mass):
+    """Simplified weak force approximation."""
+    return (particle_mass / distance) * 1e-12
+
+def strong_force_effect(distance, quark_mass):
+    """Simplified strong force approximation."""
+    return (quark_mass / (distance ** 2)) * 1e-15
+
+# Time-dependent Pulse Effect Function
+def pulse_field_effect(pulse_amplitude, pulse_width, pulse_frequency, distance, time_val):
+    """Calculate force effects with a time-dependent oscillating pulse."""
+    time_factor = math.sin(2 * math.pi * pulse_frequency * time_val)  # Oscillation effect
+
+    gravity_value = gravity_effect(pulse_amplitude, pulse_amplitude, distance) * pulse_width * time_factor
+    electromagnetism_value = electromagnetism_effect(pulse_amplitude, pulse_amplitude, distance) * pulse_width * time_factor
+    weak_force_value = weak_force_effect(distance, pulse_amplitude) * pulse_width * time_factor
+    strong_force_value = strong_force_effect(distance, pulse_amplitude) * pulse_width * time_factor
+
+    return gravity_value, electromagnetism_value, weak_force_value, strong_force_value
+
+# Global figure counter and list to store figures
+fig_count = 0
+figures = []
+
+# User Interface for Simulation
+def run_simulation():
+    global fig_count, figures
+    # Data storage for overall plotting (if needed)
+    all_times = []
+    all_grav = []
+    all_em = []
+    all_weak = []
+    all_strong = []
+    
+    while True:
+        print("\nUnified Field Theory Simulator")
+        print("1. Gravity (Newton’s Law)")
+        print("2. Electromagnetic Force (Coulomb’s Law)")
+        print("3. Relativistic Effects")
+        print("4. Weak Force Effect")
+        print("5. Strong Force Effect")
+        print("6. Dynamic Pulse Field Simulation (Manual Input)")
+        print("7. Dynamic Pulse Field Simulation (Automated)")
+        print("8. Exit")
+
+        choice = input("Enter the number of the option you want: ")
+
+        if choice == '1':
+            mass1 = float(input("Enter mass 1 (kg): "))
+            mass2 = float(input("Enter mass 2 (kg): "))
+            distance = float(input("Enter distance (m): "))
+            result = gravity_effect(mass1, mass2, distance)
+            print(f"Gravitational force: {result:.2e} N")
+
+        elif choice == '2':
+            charge1 = float(input("Enter charge 1 (C): "))
+            charge2 = float(input("Enter charge 2 (C): "))
+            distance = float(input("Enter distance (m): "))
+            result = electromagnetism_effect(charge1, charge2, distance)
+            print(f"Electromagnetic force: {result:.2e} N")
+
+        elif choice == '3':
+            velocity = float(input("Enter velocity as a fraction of the speed of light (0 to 1): ")) * c
+            time_dilation, length_contraction = relativistic_effect(velocity)
+            print(f"Time dilation factor: {time_dilation:.2f}")
+            print(f"Length contraction factor: {length_contraction:.2f}")
+
+        elif choice == '4':
+            distance = float(input("Enter distance (m): "))
+            particle_mass = float(input("Enter particle mass (kg): "))
+            result = weak_force_effect(distance, particle_mass)
+            print(f"Weak force effect: {result:.2e} N")
+
+        elif choice == '5':
+            distance = float(input("Enter distance (m): "))
+            quark_mass = float(input("Enter quark mass (kg): "))
+            result = strong_force_effect(distance, quark_mass)
+            print(f"Strong force effect: {result:.2e} N")
+
+        elif choice == '6':
+            # Manual input dynamic simulation
+            pulse_amplitude = float(input("Enter pulse amplitude: "))
+            pulse_width = float(input("Enter pulse width (m): "))
+            pulse_frequency = float(input("Enter pulse frequency (Hz): "))
+            distance = float(input("Enter distance (m): "))
+            total_time = float(input("Enter total simulation time (s): "))
+            time_step = float(input("Enter time step (s): "))
+
+            times = []
+            grav_forces = []
+            em_forces = []
+            weak_forces = []
+            strong_forces = []
+
+            t = 0.0
+            while t <= total_time:
+                ge, em, wf, sf = pulse_field_effect(pulse_amplitude, pulse_width, pulse_frequency, distance, t)
+                print(f"t = {t:.2f}s | Gravity = {ge:.2e} N, EM = {em:.2e} N, Weak = {wf:.2e} N, Strong = {sf:.2e} N")
+                times.append(t)
+                grav_forces.append(ge)
+                em_forces.append(em)
+                weak_forces.append(wf)
+                strong_forces.append(sf)
+                t += time_step
+
+            # Append this run's data to overall storage if needed
+            all_times.extend(times)
+            all_grav.extend(grav_forces)
+            all_em.extend(em_forces)
+            all_weak.extend(weak_forces)
+            all_strong.extend(strong_forces)
+            
+            # Create and show the figure for this run
+            fig_count += 1
+            fig = plt.figure(fig_count, figsize=(10, 6))
+            plt.plot(times, grav_forces, label="Gravity Force", color="blue")
+            plt.plot(times, em_forces, label="Electromagnetic Force", color="green")
+            plt.plot(times, weak_forces, label="Weak Force", color="red")
+            plt.plot(times, strong_forces, label="Strong Force", color="purple")
+            plt.xlabel('Time (s)')
+            plt.ylabel('Force (N)')
+            plt.title(f'Force Evolution Over Time (Figure {fig_count})')
+            plt.legend()
+            plt.grid(True)
+            plt.yscale('log')
+            plt.show(block=False)  # Non-blocking show so figure remains open
+            figures.append(fig)
+
+        elif choice == '7':
+            # Automated simulation that runs for at least 30 seconds
+            total_time = 30  # Minimum simulation time (seconds)
+            time_step = 0.5  # Time step for simulation
+            t = 0.0
+
+            times = []
+            grav_forces = []
+            em_forces = []
+            weak_forces = []
+            strong_forces = []
+
+            while True:
+                # Randomly generate pulse parameters
+                pulse_amplitude = random.uniform(1e-6, 1e5)  # Random amplitude
+                pulse_width = random.uniform(0.1, 10.0)         # Random width (m)
+                pulse_frequency = random.uniform(1.0, 1000.0)     # Random frequency (Hz)
+                distance = random.uniform(0.1, 100.0)             # Random distance (m)
+
+                ge, em, wf, sf = pulse_field_effect(pulse_amplitude, pulse_width, pulse_frequency, distance, t)
+                print(f"t = {t:.2f}s | Pulse Amplitude = {pulse_amplitude:.2e} | Frequency = {pulse_frequency:.2f}Hz")
+                print(f"Gravity = {ge:.2e} N, EM = {em:.2e} N, Weak = {wf:.2e} N, Strong = {sf:.2e} N")
+
+                times.append(t)
+                grav_forces.append(ge)
+                em_forces.append(em)
+                weak_forces.append(wf)
+                strong_forces.append(sf)
+
+                t += time_step
+
+                if t >= total_time:
+                    user_input = input("Do you want to continue the automated simulation? (y/n): ").strip().lower()
+                    if user_input != 'y':
+                        break
+
+            # Append this run's data to overall storage if needed
+            all_times.extend(times)
+            all_grav.extend(grav_forces)
+            all_em.extend(em_forces)
+            all_weak.extend(weak_forces)
+            all_strong.extend(strong_forces)
+
+            # Create and show the figure for this run
+            fig_count += 1
+            fig = plt.figure(fig_count, figsize=(10, 6))
+            plt.plot(times, grav_forces, label="Gravity Force", color="blue")
+            plt.plot(times, em_forces, label="Electromagnetic Force", color="green")
+            plt.plot(times, weak_forces, label="Weak Force", color="red")
+            plt.plot(times, strong_forces, label="Strong Force", color="purple")
+            plt.xlabel('Time (s)')
+            plt.ylabel('Force (N)')
+            plt.title(f'Force Evolution Over Time (Figure {fig_count})')
+            plt.legend()
+            plt.grid(True)
+            plt.yscale('log')
+            plt.show(block=False)  # Non-blocking so figure stays open
+            figures.append(fig)
+
+        elif choice == '8':
+            print("Exiting the simulator. All generated figures remain open for review.")
+            break
+
+        else:
+            print("Invalid option. Please try again.")
+
+# Run the simulation
+if __name__ == "__main__":
+    run_simulation()
+    # At this point, all figures remain open until you manually close them.
