@@ -1,0 +1,201 @@
+import math
+import random
+import matplotlib.pyplot as plt
+
+# Constants
+G = 6.67430e-11  # Gravitational constant (m^3 kg^-1 s^-2)
+k = 8.98755e9    # Coulomb constant (N m^2 C^-2)
+
+# Store simulation data
+sim_runs = []
+
+# Function to apply scaling at high energy levels (based on Planck scale, for example)
+def energy_scaling(energy_level):
+    """
+    Scale the force interactions based on the energy level.
+    Energy scale could represent the approach towards the Planck scale.
+    """
+    scaling_factor = energy_level / 1e19  # Example scaling factor based on Planck energy scale
+    return scaling_factor
+
+# Modify Force Calculation Functions to include energy scaling
+def gravity_effect(mass1, mass2, distance, energy_level):
+    """Calculate gravitational force with energy scaling."""
+    scaling_factor = energy_scaling(energy_level)
+    return (G * mass1 * mass2) / (distance ** 2) * scaling_factor
+
+def electromagnetism_effect(charge1, charge2, distance, energy_level):
+    """Calculate Coulomb's force with energy scaling."""
+    scaling_factor = energy_scaling(energy_level)
+    return k * (charge1 * charge2) / (distance ** 2) * scaling_factor
+
+def weak_force_effect(distance, particle_mass, energy_level):
+    """Simplified weak force effect with energy scaling."""
+    scaling_factor = energy_scaling(energy_level)
+    return (particle_mass / distance) * 1e-12 * scaling_factor
+
+def strong_force_effect(distance, quark_mass, energy_level):
+    """Simplified strong force effect with energy scaling."""
+    scaling_factor = energy_scaling(energy_level)
+    return (quark_mass / (distance ** 2)) * 1e-15 * scaling_factor
+
+# Unified force field effect (simplified approach)
+def unified_field_effect(pulse_amplitude, pulse_width, pulse_frequency, distance, time_val, energy_level):
+    """Calculate force effects with a unified field model."""
+    # Apply oscillations based on pulse frequency
+    time_factor = math.sin(2 * math.pi * pulse_frequency * time_val)  # Oscillation effect
+
+    # Calculate individual forces with energy scaling
+    gravity_value = gravity_effect(pulse_amplitude, pulse_amplitude, distance, energy_level) * pulse_width * time_factor
+    electromagnetism_value = electromagnetism_effect(pulse_amplitude, pulse_amplitude, distance, energy_level) * pulse_width * time_factor
+    weak_force_value = weak_force_effect(distance, pulse_amplitude, energy_level) * pulse_width * time_factor
+    strong_force_value = strong_force_effect(distance, pulse_amplitude, energy_level) * pulse_width * time_factor
+
+    # Unified field force calculation (simply sum forces as a starting point)
+    unified_force = gravity_value + electromagnetism_value + weak_force_value + strong_force_value
+
+    return gravity_value, electromagnetism_value, weak_force_value, strong_force_value, unified_force
+
+# Manual input dynamic simulation with unified field
+def manual_simulation():
+    pulse_amplitude = float(input("Enter pulse amplitude: "))
+    pulse_width = float(input("Enter pulse width (m): "))
+    pulse_frequency = float(input("Enter pulse frequency (Hz): "))
+    distance = float(input("Enter distance (m): "))
+    total_time = float(input("Enter total simulation time (s): "))
+    time_step = float(input("Enter time step (s): "))
+    energy_level = float(input("Enter energy level (GeV, e.g., 1e19 for Planck energy): "))  # New input for energy level
+
+    times = []
+    grav_forces = []
+    em_forces = []
+    weak_forces = []
+    strong_forces = []
+    unified_forces = []
+
+    t = 0.0
+    while t <= total_time:
+        ge, em, wf, sf, uf = unified_field_effect(pulse_amplitude, pulse_width, pulse_frequency, distance, t, energy_level)
+        print(f"t = {t:.2f}s | Gravity = {ge:.2e} N, EM = {em:.2e} N, Weak = {wf:.2e} N, Strong = {sf:.2e} N, Unified = {uf:.2e} N")
+        times.append(t)
+        grav_forces.append(ge)
+        em_forces.append(em)
+        weak_forces.append(wf)
+        strong_forces.append(sf)
+        unified_forces.append(uf)
+        t += time_step
+
+    # Store this simulation run
+    sim_runs.append({
+        'times': times,
+        'gravity': grav_forces,
+        'em': em_forces,
+        'weak': weak_forces,
+        'strong': strong_forces,
+        'unified': unified_forces
+    })
+
+# Automated simulation with unified field effect
+def automated_simulation():
+    total_time = 30  # Minimum simulation time in seconds
+    time_step = 0.5  # Time step for simulation
+    t = 0.0
+    energy_level = random.uniform(1e5, 1e80)  # Random energy level between low and Planck scale
+
+    times = []
+    grav_forces = []
+    em_forces = []
+    weak_forces = []
+    strong_forces = []
+    unified_forces = []
+
+    while True:
+        pulse_amplitude = random.uniform(1e-6, 1e5)
+        pulse_width = random.uniform(0.1, 10.0)
+        pulse_frequency = random.uniform(1.0, 1000.0)
+        distance = random.uniform(0.1, 100.0)
+
+        ge, em, wf, sf, uf = unified_field_effect(pulse_amplitude, pulse_width, pulse_frequency, distance, t, energy_level)
+        print(f"t = {t:.2f}s | Pulse Amplitude = {pulse_amplitude:.2e} | Frequency = {pulse_frequency:.2f}Hz")
+        print(f"Gravity = {ge:.2e} N, EM = {em:.2e} N, Weak = {wf:.2e} N, Strong = {sf:.2e} N, Unified = {uf:.2e} N")
+
+        times.append(t)
+        grav_forces.append(ge)
+        em_forces.append(em)
+        weak_forces.append(wf)
+        strong_forces.append(sf)
+        unified_forces.append(uf)
+
+        t += time_step
+
+        if t >= total_time:
+            user_input = input("Do you want to continue the automated simulation? (y/n): ").strip().lower()
+            if user_input != 'y':
+                break
+
+    # Store this simulation run
+    sim_runs.append({
+        'times': times,
+        'gravity': grav_forces,
+        'em': em_forces,
+        'weak': weak_forces,
+        'strong': strong_forces,
+        'unified': unified_forces
+    })
+
+# Plotting function
+def plot_results():
+    for sim_run in sim_runs:
+        plt.figure(figsize=(10, 6))
+
+        plt.subplot(2, 2, 1)
+        plt.plot(sim_run['times'], sim_run['gravity'], label='Gravity', color='blue')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Force (N)')
+        plt.title('Gravitational Force')
+
+        plt.subplot(2, 2, 2)
+        plt.plot(sim_run['times'], sim_run['em'], label='Electromagnetic', color='red')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Force (N)')
+        plt.title('Electromagnetic Force')
+
+        plt.subplot(2, 2, 3)
+        plt.plot(sim_run['times'], sim_run['weak'], label='Weak Force', color='green')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Force (N)')
+        plt.title('Weak Force')
+
+        plt.subplot(2, 2, 4)
+        plt.plot(sim_run['times'], sim_run['unified'], label='Unified Field Force', color='purple')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Force (N)')
+        plt.title('Unified Field Force')
+
+        plt.tight_layout()
+        plt.show()
+
+# Main function to select between manual and automated simulation
+def main():
+    while True:
+        print("Choose simulation type:")
+        print("1. Manual Simulation")
+        print("2. Automated Simulation")
+        choice = input("Enter choice (1/2): ")
+
+        if choice == '1':
+            manual_simulation()
+        elif choice == '2':
+            automated_simulation()
+        else:
+            print("Invalid choice, please try again.")
+
+        user_input = input("Do you want to run another simulation? (y/n): ").strip().lower()
+        if user_input != 'y':
+            break
+
+    plot_results()  # Plot after all simulations are completed
+
+# Run the simulation
+if __name__ == "__main__":
+    main()
